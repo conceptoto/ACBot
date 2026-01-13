@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands, tasks
-import logging
+import logging.handlers
 from dotenv import load_dotenv
 import os
 import datetime
@@ -15,12 +15,10 @@ snowy_id = os.getenv('SNOWAGER_ROLE_ID')
 date_format = os.getenv('DATE_FORMAT')
 
 #Handle logging 
-handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
+handler = logging.handlers.TimedRotatingFileHandler(filename='discord.log', encoding='utf-8', when='D', interval=1, backupCount=3)
 
 #timezone
 pst = ZoneInfo("America/Los_Angeles")
-
-midnight = [datetime.datetime(year=2000, month=1, day=1, hour=0, minute=0, tzinfo=pst).timetz()]
 
 snowy_times = [datetime.datetime(year=2000, month=1, day=1, hour=6+8*i, minute=0, tzinfo=pst).timetz() for i in range(3)]#"look at me i use list comprehension im so smart" eat shit asshole, fall off your horse
 
@@ -160,15 +158,5 @@ async def turmy_messages():
     turmac_times = [time for time in turmac_times if time > datetime.datetime.now()] #i think this should work....? keeps only times bigger than now? eh i can just .tw to check, surely its fine :clueless:
 
     await channel.send(embed=embedding)
-
-@tasks.loop(time=midnight) #surely there's an in-logging way to do this but "What, me worry?"
-async def clearlog():
-
-    file_path = "discord.log"
-
-    if os.path.exists(file_path):
-        os.remove(file_path)
-    else:
-        print("Brother something's borked.")
 
 bot.run(token, log_handler=handler, log_level=logging.DEBUG)
