@@ -1,0 +1,5 @@
+discord.py
+python-env
+aiocron
+requests
+beautifulsoup4

@@ -1,0 +1,174 @@
+import discord
+from discord.ext import commands, tasks
+import logging
+from dotenv import load_dotenv
+import os
+import datetime
+from zoneinfo import ZoneInfo
+
+#Load env variables
+load_dotenv()
+token = os.getenv('DISCORD_TOKEN')
+channel_id = int(os.getenv('CHANNEL_ID'))
+turmy_id = os.getenv('TURMAC_ROLE_ID')
+snowy_id = os.getenv('SNOWAGER_ROLE_ID')
+date_format = os.getenv('DATE_FORMAT')
+
+#Handle logging 
+handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
+
+#timezone
+pst = ZoneInfo("America/Los_Angeles")
+
+midnight = [datetime.datetime(year=2000, month=1, day=1, hour=0, minute=0, tzinfo=pst).timetz()]
+
+snowy_times = [datetime.datetime(year=2000, month=1, day=1, hour=6+8*i, minute=0, tzinfo=pst).timetz() for i in range(3)]#"look at me i use list comprehension im so smart" eat shit asshole, fall off your horse
+
+turmac_times = [datetime.datetime(year=2000, month=1, day=1, hour=0, minute=0, tzinfo=pst).timetz()] #just a placeholder i should make this run off of a file and the snowy times too tbh
+
+# --------------- BOT STARTS HERE ---------------
+
+#Set bots intents, what it's allowed to see
+intents = discord.Intents.default()
+intents.message_content = True
+
+#Initialize bot
+bot = commands.Bot(command_prefix='.', intents=intents, help_command=None)
+
+#this pops up when the bot starts, its neat
+@bot.event
+async def on_ready():
+    print(f"Hiya! {bot.user.name}")
+    snowy_messages.start()
+    turmy_messages.start()
+    #channel = bot.get_channel(channel_id)
+    #await channel.send("Hi guys, I'm online!")
+    
+#func to parse brownhownd times
+def brown_to_time(dateslist):
+    dates = []
+    for date in dateslist:
+
+        all = date.split(": ")
+        a = all[0] #just the date, no time
+
+        if "Awake" in date: #kill "awake" times
+            continue
+
+        times = [i for i in all[1].strip(" NST").split(" ") if i not in ("or", "OR")] #readable code is for CHUMPS
+        for time in times:
+            dateandtime = a + " " + time
+
+            dateobject = datetime.datetime.strptime(dateandtime, date_format)
+            dateobject = dateobject.replace(tzinfo=pst)
+            
+            dates.append(dateobject)
+        
+    if dates: return dates
+    else: return -1
+
+def times_print(times):
+    returned = ""
+    for time in times:
+        returned += "\n* "
+        returned += time.strftime("%b-%d %H:%M")
+        returned += ".\n"
+    return returned
+
+@bot.command()
+async def help(command):
+    embedding = discord.Embed(
+    title="Here are the things that i can do!", 
+    description="""* **help**: You already know this one! A handy shorthand is using **.h**!
+    \n* **turmytimes**: This one's used to send the turmaculus times in the same format as [Brownhownd](https://www.neopets.com/~Brownhownd) (you can also use .tt)
+    \n* **turmywhen**: You can use this one to know how many wake-up times are left in the queue! (you can also use .tw)
+    \n* **turmac**: This one pings everyone with the turmac role! (you can also use .turmy or .t)
+    \n* **igloo**: This ones doesn't ping anyone atm, but it links to igloo! Useful to anounce it's stocked! (yadda yadda .i)
+    \n* **ping**: It's a ping! You know, [A Ping](https://en.wikipedia.org/wiki/Ping_(networking_utility))""",
+    color=0xFA903E
+    )
+    await command.send(embed=embedding)
+
+@bot.command()
+async def ping(command):
+    await command.send("Pong")
+
+@bot.command(aliases=["tt"])
+async def turmytimes(ctx, *, arg):
+
+    global turmac_times
+
+    arg = [item for item in arg.split("\n") if item] #remove empty lines from list of times 
+    turmac_times = brown_to_time(arg)
+    channel = bot.get_channel(channel_id)
+    
+    embedding = discord.Embed(
+    title="New Turmaculus Times Uploaded!", 
+    url="https://www.neopets.com/~Brownhownd",
+    description=f"new turmy times are the following:\n\n{times_print(turmac_times)}\n\nI'll format this nicer eventually, promise!",
+    color=0x996699
+    )
+    embedding.set_image(url="https://images.neopets.com/new_shopkeepers/939.gif")
+    
+    await channel.send(embed=embedding)
+
+@bot.command(aliases=["tw"])
+async def turmywhen(command):
+    await command.send(f"Hi There!\n\nThe Currently Stored Turmy Times Are:{times_print(turmac_times)}")
+
+@bot.command(aliases=["turmy", "t"])
+async def turmac(command):
+    await command.send(f"Wow {command.author.mention}, you sure he's awake?\nOh well, not my problem\n<@&{int(turmy_id)}> !")
+
+@bot.command(aliases=["i"])#oh gosh i sure am being nice with this one aw shucks aw hope they use it and that uhhhhhhhh they give me a quadrillion dallas texas cowboys
+async def igloo(command):
+    await command.send(f"Hi there {command.author.mention}!\nIgloo is here: https://www.neopets.com/winter/igloo.phtml?stock=1 :)")
+
+@bot.command()
+async def gura(command):
+    await command.send("gura is so cool, some say she's goated.")
+
+@tasks.loop(time=snowy_times)
+async def snowy_messages():
+    channel = bot.get_channel(channel_id)
+    
+    embedding = discord.Embed(
+    title="The Snowager is Asleep! 🐍❄️", 
+    url="https://www.neopets.com/winter/snowager.phtml", 
+    description=f"Come get blasted everybody!!",
+    color=0x009dff
+    )
+    embedding.set_image(url="https://images.neopets.com/winter/iceworm_sleep.gif")
+
+    await channel.send(f"<@&{int(snowy_id)}>", embed=embedding)
+
+@tasks.loop(time=turmac_times)
+async def turmy_messages():
+
+    global turmac_times
+
+    channel = bot.get_channel(channel_id)    
+
+    embedding = discord.Embed(
+    title="The Turmaculus Could Be Asleep! ༘ 🦕𖦹⋆｡˚", 
+    url="https://www.neopets.com/medieval/turmaculus.phtml", 
+    description="NOW LISTEN HERE YOU ROLY POLY MOTHERFUCKER\n\nIf he's asleep make sure to ping using .turmac!",
+    color=0x996699
+    )
+    embedding.set_image(url="https://images.neopets.com/new_shopkeepers/939.gif")
+
+    turmac_times = [time for time in turmac_times if time > datetime.datetime.now()] #i think this should work....? keeps only times bigger than now? eh i can just .tw to check, surely its fine :clueless:
+
+    await channel.send(embed=embedding)
+
+@tasks.loop(time=midnight) #surely there's an in-logging way to do this but "What, me worry?"
+async def clearlog():
+
+    file_path = "discord.log"
+
+    if os.path.exists(file_path):
+        os.remove(file_path)
+    else:
+        print("Brother something's borked.")
+
+bot.run(token, log_handler=handler, log_level=logging.DEBUG)
