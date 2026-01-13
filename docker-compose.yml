@@ -7,4 +7,4 @@ services:
       - CHANNEL_ID=YOUR CHANNEL ID HERE
       - SNOWAGER_ROLE_ID=YOUR SNOWAGER ROLE ID HERE
       - TURMAC_ROLE_ID=YOUR TURMAC ROLE ID HERE
-      - DATE_FORMAT="%a, %b %d, %Y %I%p"
+      - DATE_FORMAT=%a, %b %d, %Y %I%p
