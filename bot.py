@@ -155,7 +155,7 @@ async def turmy_messages():
     )
     embedding.set_image(url="https://images.neopets.com/new_shopkeepers/939.gif")
 
-    turmac_times = [time for time in turmac_times if time > datetime.datetime.now(pst).timetz()] #i think this should work....? keeps only times bigger than now? eh i can just .tw to check, surely its fine :clueless:
+    turmac_times = [time for time in turmac_times if time > datetime.datetime.now(pst)] #i think this should work....? keeps only times bigger than now? eh i can just .tw to check, surely its fine :clueless:
 
     await channel.send(embed=embedding)
 
