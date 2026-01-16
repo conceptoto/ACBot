@@ -98,6 +98,8 @@ async def help(command):
     \n* **turmywhen**: You can use this one to know how many wake-up times are left in the queue! (you can also use .tw)
     \n* **igloo**: This ones doesn't ping anyone atm, but it links to igloo! Useful to anounce it's stocked! (yadda yadda .i)
     \n* **ping**: It's a ping! You know, [A Ping](https://en.wikipedia.org/wiki/Ping_(networking_utility))
+    \n* **mpic**: Links to Mystery Pic! Because why not.
+    \n* **artgallery**: Links to the Neopets Art Gallery! (also .ag)
     \n* Also, there may be a couple secrets (but it's a secret!).""",
     color=0xFA903E
     )
@@ -106,6 +108,18 @@ async def help(command):
 @bot.command()
 async def ping(command):
     await command.send("Pong")
+
+@bot.command()
+async def gura(command):
+    await command.send("gura is so cool, some say she's goated.")
+
+@bot.command()
+async def dale(command):
+    await command.send("Dale only gets better with age. 👴 🦖")
+
+@bot.command()
+async def carol(command):
+    await command.send("YAY SPORTS! 🏈 🏒 ⚾️")
 
 @bot.command()
 async def hero(command):
@@ -122,10 +136,6 @@ async def sweet(command):
 @bot.command()
 async def liz(command):
     await command.send("Pro")
-
-@bot.command()
-async def hero(command):
-    await command.send("Rich")
 
 @bot.command()
 async def mpic(command):
@@ -164,18 +174,6 @@ async def turmywhen(command):
 @bot.command(aliases=["i"])#oh gosh i sure am being nice with this one aw shucks aw hope they use it and that uhhhhhhhh they give me a quadrillion dallas texas cowboys
 async def igloo(command):
     await command.send(f"Hi there {command.author.mention}!\nIgloo is here: https://www.neopets.com/winter/igloo.phtml?stock=1 :)")
-
-@bot.command()
-async def gura(command):
-    await command.send("gura is so cool, some say she's goated.")
-
-@bot.command()
-async def dale(command):
-    await command.send("Dale only gets better with age. 👴 🦖")
-
-@bot.command()
-async def carol(command):
-    await command.send("YAY SPORTS! 🏈 🏒 ⚾️")
 
 @tasks.loop(time=snowy_times)
 async def snowy_messages():
