@@ -178,6 +178,10 @@ async def coco(command):
     await command.send("BOSTON")
 
 @bot.command()
+async def amii(command):
+    await command.send("r99 queen")
+
+@bot.command()
 async def mpic(command):
     await command.send("https://www.neopets.com/games/mysterypic.phtml, this should ping maybe idk :carol:")
 
@@ -191,6 +195,9 @@ async def turmytimes(ctx, *, arg):
     global turmac_times
 
     turmac_times = brown_to_time(arg)
+    turmy_messages.restart()
+    print("New turmy times list: ", turmac_times)
+    print("Printing current loop after changing times and restarting: ", turmy_messages.current_loop)
     channel = bot.get_channel(channel_id)
     
     embedding = discord.Embed(
@@ -247,10 +254,12 @@ async def turmy_messages():
     print("Pinging turmy role at what should be: ", turmac_times[0].strftime("%b-%d %H:%M"))
     print("The current time is actually: ", datetime.datetime.now(pst).strftime("%b-%d %H:%M"))
     print("The current turmy times list is: ", turmac_times)
+    print("Printing current loop before changing times: ", turmy_messages.current_loop)
 
     turmac_times = [time for time in turmac_times if time > datetime.datetime.now(pst)] #i think this should work....? keeps only times bigger than now? eh i can just .tw to check, surely its fine :clueless:
-
+    turmy_messages.restart()
     print("New turmy times list: ", turmac_times)
+    print("Printing current loop after changing times and restarting: ", turmy_messages.current_loop)
 
     await channel.send(f"<@&{int(turmy_id)}>", embed=embedding)
 
