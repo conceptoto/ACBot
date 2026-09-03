@@ -13,6 +13,7 @@ token = os.getenv('DISCORD_TOKEN')
 channel_id = int(os.getenv('CHANNEL_ID'))
 turmy_id = os.getenv('TURMAC_ROLE_ID')
 snowy_id = os.getenv('SNOWAGER_ROLE_ID')
+obelisk_id = os.getenv('OBELISK_ROLE_ID')
 date_format = os.getenv('DATE_FORMAT')
 
 #Handle logging 
@@ -24,6 +25,8 @@ pst = ZoneInfo("America/Los_Angeles")
 snowy_times = [datetime.datetime(year=2000, month=1, day=1, hour=6+8*i, minute=0, tzinfo=pst).timetz() for i in range(3)]#"look at me i use list comprehension im so smart" eat shit asshole, fall off your horse
 
 turmac_times = [datetime.datetime(year=2000, month=1, day=1, hour=0, minute=0, tzinfo=pst).timetz()] #just a placeholder i should make this run off of a file and the snowy times too tbh
+
+obelisk_seed_day = datetime.date(2026, 9, 2) #known obelisk deadline
 
 # --------------- BOT STARTS HERE ---------------
 
@@ -40,6 +43,8 @@ async def on_ready():
     print(f"Hiya! {bot.user.name}")
     snowy_messages.start()
     turmy_messages.start()
+    obelisk_messages.start()
+
     #channel = bot.get_channel(channel_id)
     #await channel.send("Hi guys, I'm online!")
     
@@ -88,106 +93,6 @@ def times_print(times):
         returned += time.strftime("%b-%d %H:%M")
         returned += ".\n"
     return returned
-
-@bot.command()
-async def help(command):
-    embedding = discord.Embed(
-    title="Here are the things that i can do!", 
-    description="""* **help**: You already know this one! A handy shorthand is using **.h**!
-    \n* **turmytimes**: This one's used to send the turmaculus times in the same format as [Brownhownd](https://www.neopets.com/~Brownhownd) (you can also use .tt)
-    \n* **turmywhen**: You can use this one to know how many wake-up times are left in the queue! (you can also use .tw)
-    \n* **igloo**: This ones doesn't ping anyone atm, but it links to igloo! Useful to anounce it's stocked! (yadda yadda .i)
-    \n* **ping**: It's a ping! You know, [A Ping](https://en.wikipedia.org/wiki/Ping_(networking_utility))
-    \n* **mpic**: Links to Mystery Pic! Because why not.
-    \n* **artgallery**: Links to the Neopets Art Gallery! (also .ag)
-    \n* Also, there may be a couple secrets (but it's a secret!).""",
-    color=0xFA903E
-    )
-    await command.send(embed=embedding)
-
-@bot.command()
-async def ping(command):
-    await command.send("Pong")
-
-@bot.command()
-async def gura(command):
-    await command.send("gura is so cool, some say she's goated.")
-
-@bot.command()
-async def dale(command):
-    await command.send("Dale only gets better with age. 👴 🦖")
-
-@bot.command()
-async def carol(command):
-    await command.send("YAY SPORTS! 🏈 🏒 ⚾️")
-
-@bot.command()
-async def hero(command):
-    await command.send("Rich")
-
-@bot.command()
-async def connie(command):
-    await command.send("Pro")
-
-@bot.command()
-async def sweet(command):
-    await command.send("Goat")
-
-@bot.command()
-async def liz(command):
-    await command.send("Pro")
-
-@bot.command()
-async def lupana(command):
-    await command.send("Certified Pharmacy Pro")
-
-@bot.command()
-async def lee(command):
-    await command.send("Expert at www.neopets.com")
-
-@bot.command()
-async def toto(command):
-    await command.send("Most Readable Code Writer")
-
-@bot.command()
-async def sharkie(command):
-    await command.send("90 percent of gamblers....")
-
-@bot.command()
-async def justin(command):
-    await command.send("STAMPS")
-
-@bot.command()
-async def charlene(command):
-    await command.send("The Storyteller")
-
-@bot.command()
-async def tami(command):
-    await command.send("RUN TAMI RUN")
-
-@bot.command()
-async def ash(command):
-    await command.send("Thunder from down under")
-
-@bot.command()
-async def maddie(command):
-    await command.send("NT Story Pro")
-
-@bot.command()
-async def coco(command):
-    await command.send("BOSTON")
-
-@bot.command()
-async def amii(command):
-    await command.send("r99 queen")
-
-@bot.command()
-async def mpic(command):
-    await command.send("https://www.neopets.com/games/mysterypic.phtml, this should ping maybe idk :carol:")
-
-@bot.command(aliases=["ag"])
-async def artgallery(command):
-    await command.send("https://www.neopets.com/art/gallery.phtml")
 
 @bot.command(aliases=["tt"])
 async def turmytimes(ctx, *, arg):
@@ -262,5 +167,124 @@ async def turmy_messages():
     print("Printing current loop after changing times and restarting: ", turmy_messages.current_loop)
 
     await channel.send(f"<@&{int(turmy_id)}>", embed=embedding)
+
+@tasks.loop(time=datetime.time(hour=0, minute=0, tzinfo=pst))
+async def obelisk_messages():
+    if (datetime.datetime.now(pst).date() - obelisk_seed_day).days % 14 != 0:
+        return
+    else:
+        channel = bot.get_channel(channel_id)
+            
+        embedding = discord.Embed(
+        title="Time to pick a faction!!", 
+        url="https://www.neopets.com/prehistoric/battleground/", 
+        description=f"Do we even know who the pick is <Clueless:1534993720372625539>",
+        color=0xf3f1d4
+        )
+        embedding.set_image(url="https://images.neopets.com/items/weap_shard_obelisk.gif")
+    
+        await channel.send(f"<@&{int(obelisk_id)}>",embed=embedding)
+    
+
+@bot.command()
+async def help(command):
+    embedding = discord.Embed(
+    title="Here are the things that i can do!", 
+    description="""* **help**: You already know this one! A handy shorthand is using **.h**!
+    \n* **turmytimes**: This one's used to send the turmaculus times in the same format as [Brownhownd](https://www.neopets.com/~Brownhownd) (you can also use .tt)
+    \n* **turmywhen**: You can use this one to know how many wake-up times are left in the queue! (you can also use .tw)
+    \n* **igloo**: This ones doesn't ping anyone atm, but it links to igloo! Useful to anounce it's stocked! (yadda yadda .i)
+    \n* **ping**: It's a ping! You know, [A Ping](https://en.wikipedia.org/wiki/Ping_(networking_utility))
+    \n* **mpic**: Links to Mystery Pic! Because why not.
+    \n* **artgallery**: Links to the Neopets Art Gallery! (also .ag)
+    \n* Also, there may be a couple secrets (but it's a secret!).""",
+    color=0xFA903E
+    )
+    await command.send(embed=embedding)
+
+@bot.command()
+async def ping(command):
+    await command.send("Pong")
+
+@bot.command()
+async def gura(command):
+    await command.send("gura is so cool, some say she's goated.")
+
+@bot.command()
+async def dale(command):
+    await command.send("Dale only gets better with age. 👴 🦖")
+
+@bot.command()
+async def carol(command):
+    await command.send("YAY SPORTS! 🏈 🏒 ⚾️")
+
+@bot.command()
+async def hero(command):
+    await command.send("Rich")
+
+@bot.command()
+async def connie(command):
+    await command.send("Pro")
+
+@bot.command()
+async def sweet(command):
+    await command.send("Goat")
+
+@bot.command()
+async def liz(command):
+    await command.send("Pro")
+
+@bot.command()
+async def lupana(command):
+    await command.send("Certified Pharmacy Pro")
+
+@bot.command()
+async def lee(command):
+    await command.send("Expert at www.neopets.com")
+
+@bot.command()
+async def toto(command):
+    await command.send("Most Readable Code Writer")
+
+@bot.command()
+async def sharkie(command):
+    await command.send("90 percent of gamblers....")
+
+@bot.command()
+async def justin(command):
+    await command.send("STAMPS")
+
+@bot.command()
+async def charlene(command):
+    await command.send("NEW MAMA!!")
+
+@bot.command()
+async def tami(command):
+    await command.send("RUN TAMI RUN")
+
+@bot.command()
+async def ash(command):
+    await command.send("Thunder from down under")
+
+@bot.command()
+async def maddie(command):
+    await command.send("NT Story Pro")
+
+@bot.command()
+async def coco(command):
+    await command.send("rich lois griffin")
+
+@bot.command()
+async def amii(command):
+    await command.send("r99 queen")
+
+@bot.command()
+async def mpic(command):
+    await command.send("https://www.neopets.com/games/mysterypic.phtml, this should ping maybe idk :carol:")
+
+@bot.command(aliases=["ag"])
+async def artgallery(command):
+    await command.send("https://www.neopets.com/art/gallery.phtml")
+
 
 bot.run(token, log_handler=handler, log_level=logging.DEBUG)
