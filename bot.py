@@ -26,7 +26,12 @@ snowy_times = [datetime.datetime(year=2000, month=1, day=1, hour=6+8*i, minute=0
 
 turmac_times = [datetime.datetime(year=2000, month=1, day=1, hour=0, minute=0, tzinfo=pst).timetz()] #just a placeholder i should make this run off of a file and the snowy times too tbh
 
-obelisk_seed_day = datetime.date(2026, 9, 2) #known obelisk deadline
+# obelisk stuff
+obelisk_seed_day = datetime.date(2026, 9, 2) #known obelisk deadline to make your picks
+obelisk_battle_start = datetime.date(2026, 9, 3) #known obelisk deadline to start battles
+obelisk_battle_deadline = datetime.date(2026, 9, 6) #known obelisk deadline to finish battles
+obelisk_boon_deadline = datetime.date(2026, 9, 7) #known obelisk deadline to choose your boon
+obelisk_pick = "";
 
 # --------------- BOT STARTS HERE ---------------
 
@@ -170,11 +175,10 @@ async def turmy_messages():
 
 @tasks.loop(time=datetime.time(hour=0, minute=0, tzinfo=pst))
 async def obelisk_messages():
-    if (datetime.datetime.now(pst).date() - obelisk_seed_day).days % 14 != 0:
-        return
-    else:
-        channel = bot.get_channel(channel_id)
-            
+    channel = bot.get_channel(channel_id)
+
+    # pick faction
+    if (datetime.datetime.now(pst).date() - obelisk_seed_day).days % 14 == 0:
         embedding = discord.Embed(
         title="Time to pick a faction!!", 
         url="https://www.neopets.com/prehistoric/battleground/", 
@@ -184,6 +188,42 @@ async def obelisk_messages():
         embedding.set_image(url="https://images.neopets.com/items/weap_shard_obelisk.gif")
     
         await channel.send(f"<@&{int(obelisk_id)}>",embed=embedding)
+    # start battles
+    elif (datetime.datetime.now(pst).date() - obelisk_battle_start).days % 14 == 0:
+        embedding = discord.Embed(
+        title="Time to battle!!", 
+        url="https://www.neopets.com/prehistoric/battleground/", 
+        description=f"You can start battling now!",
+        color=0xf3f1d4
+        )
+        embedding.set_image(url="https://images.neopets.com/items/weap_shard_obelisk.gif")
+    
+        await channel.send(f"<@&{int(obelisk_id)}>",embed=embedding)
+    # finish battles
+    elif (datetime.datetime.now(pst).date() - obelisk_battle_deadline).days % 14 == 0:
+        embedding = discord.Embed(
+        title="Last day to battle!!", 
+        url="https://www.neopets.com/prehistoric/battleground/", 
+        description=f"Did you finish your battles? Last day!",
+        color=0xf3f1d4
+        )
+        embedding.set_image(url="https://images.neopets.com/items/weap_shard_obelisk.gif")
+    
+        await channel.send(f"<@&{int(obelisk_id)}>",embed=embedding)
+    # choose boon
+    elif (datetime.datetime.now(pst).date() - obelisk_boon_deadline).days % 14 == 0:
+        embedding = discord.Embed(
+        title="Time to choose your boon!!", 
+        url="https://www.neopets.com/prehistoric/battleground/", 
+        description=f"Make sure you choose your boon before doing your dailies!",
+        color=0xf3f1d4
+        )
+        embedding.set_image(url="https://images.neopets.com/items/weap_shard_obelisk.gif")
+    
+        await channel.send(f"<@&{int(obelisk_id)}>",embed=embedding)
+    else:
+        return
+        
     
 
 @bot.command()
@@ -191,8 +231,9 @@ async def help(command):
     embedding = discord.Embed(
     title="Here are the things that i can do!", 
     description="""* **help**: You already know this one! A handy shorthand is using **.h**!
-    \n* **turmytimes**: This one's used to send the turmaculus times in the same format as [Brownhownd](https://www.neopets.com/~Brownhownd) (you can also use .tt)
-    \n* **turmywhen**: You can use this one to know how many wake-up times are left in the queue! (you can also use .tw)
+    # \n* **turmytimes**: This one's used to send the turmaculus times in the same format as [Brownhownd](https://www.neopets.com/~Brownhownd) (you can also use .tt)
+    # \n* **turmywhen**: You can use this one to know how many wake-up times are left in the queue! (you can also use .tw)
+    \n* **turmac**: This one pings everyone with the turmac role! (you can also use .turmy or .t)
     \n* **igloo**: This ones doesn't ping anyone atm, but it links to igloo! Useful to anounce it's stocked! (yadda yadda .i)
     \n* **ping**: It's a ping! You know, [A Ping](https://en.wikipedia.org/wiki/Ping_(networking_utility))
     \n* **mpic**: Links to Mystery Pic! Because why not.
